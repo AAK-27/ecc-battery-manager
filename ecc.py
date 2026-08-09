@@ -384,7 +384,7 @@ class EnhancedCoulombCounting():
         file_path = vsu.generate_experiment_file(action, file_name, parameters, f"Battery {battery_id}")
         # File path will be None if vsm failed to generate the experiment file
         if file_path is not None: # Ensure the file was generated successfully
-            if self.vsm.open_experiment(file_path, instrument_index=instrument_index): # Ensure vsm is able to open the file
+            if self.vsm.open_experiment(file_path, keep_open=True, instrument_index=instrument_index): # Ensure vsm is able to open the file
                 if self.vsm.run_experiment(): # Ensure vsm runs the experiment successfully
                     experiment_directory = os.path.dirname(file_path)
                     

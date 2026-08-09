@@ -148,6 +148,7 @@ class VersaStudioManager():
         try:
             # Navigate through the menu to open the instrument selection pane
             self.window.menu_select("Tools->Select Instrument")
+            self.window_uia.wait("ready", timeout=3)
             # Use the UIA backend to search for the instrument label
             instrument_ui_label = self.window_uia.child_window(title=instrument_label, auto_id="lbName")
             instrument_ui_label.double_click_input() # you have to double click the label to select it
@@ -160,12 +161,15 @@ class VersaStudioManager():
 
     def run_experiment(self) -> bool:
         try:
+            self.window_uia.maximize()
             run_button = self.window_uia.child_window(title_re=".*Run.*", control_type="Button")
             run_button.click()
             return True
         except Exception as e:
             print(f"WARNING! An error occured in run_experiment: {e}\nFailed to run experiment.")
             return False
+        finally:
+            self.window_uia.minimize()
 
 def generate_experiment_file(action_type: str, filename: str, parameters: dict, subdir: str = "") -> str|None:
     """
