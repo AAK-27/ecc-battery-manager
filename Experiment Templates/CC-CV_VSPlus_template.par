@@ -1,0 +1,170 @@
+<Application>
+Name=VersaStudio
+Version=2.70.6.0
+LoggedIn=Security Disabled
+Language [VersaStudio]=English (United States) [en-US]
+Language [Region and Language]=English (United States) [en-US]
+Language [Windows Operating System]=English (United States) [en-US]
+</Application>
+
+<Action0>
+Limits2,Value=0
+Limits2,Direction=<
+Limits2,Limits=None
+Limits1,Value=0
+Limits1,Direction=<
+Limits1,Limits=None
+RotationRateConversionFactor=0.00025
+Measured Open Circuit=0
+E2 Cell to Use=Internal
+Remeasure OC Per Action (External Cell)=No
+Mass (g)=0
+Equivalent Weight (g)=0
+Density (g/ml)=0
+Working Electrode Area (cm2)=1
+RDE Speed (Volts)=0
+Working Electrode Type=Unspecified
+Reference Electrode=(unspecified) (0 Volts)
+Segments=0
+Name=Common
+Comment=Enter comments about the experiment here.
+</Action0>
+
+<Instrument>
+Type=VersaSTAT4
+Model=
+SN=
+Options=
+Firmware=
+BoosterDetails=
+</Instrument>
+
+<Experiment>
+SelectionEnd=0
+SelectionStart=0
+Height=661
+Width=712
+LocY=0
+LocX=0
+Show=True
+</Experiment>
+
+<DataView>
+ShowDCLabels=False
+ShowACLabels=False
+ShowDataFilter=False
+DataReduction=1
+ShowEvery=100
+Decimate=False
+AutomaticDecimation=False
+ViewSegments=All Segments
+Height=328
+Width=728
+LocY=0
+LocX=0
+Show=False
+</DataView>
+
+<StripView>
+Height=240
+Width=344
+LocY=0
+LocX=0
+Show=False
+</StripView>
+
+<Overlays>
+Height=438
+Width=294
+LocY=0
+LocX=0
+Show=False
+</Overlays>
+
+<Action1>
+Limits22,Value=0
+Limits22,Direction=<
+Limits22,Limits=None
+Limits21,Value={cv_current}
+Limits21,Direction=<
+Limits21,Limits=Current(A)
+Limits2,Value=0
+Limits2,Direction=<
+Limits2,Limits=None
+Limits1,Value={voltage}
+Limits1,Direction=>
+Limits1,Limits=Potential(V)
+Cell to Use=External
+Leave Cell ON=No
+LCI Bandwidth Limit=Auto
+Bandwidth Limit=Full
+I Filter=None
+E2 Filter=None
+E Filter=None
+Electrometer Mode=Differential
+Acquisition Mode=Auto
+VoltageRange=+/-6V
+Current Range=2A
+Max Total Points=20
+Min. Total Points=20
+Delta Q (mAh)=0
+Delta I (mA)=0
+Delta E (mV)=0
+Delta Resolution=10
+Duration (s)={duration}
+Time Per Point (s)={tpp}
+Accrue Q=No
+Potential (V),Versus=vs Ref
+Potential (V),Value={voltage}
+Applied I (mA)=0
+|Capacity| (mAh)=0
+Current=Charging
+Current (A)={current}
+Segments=2
+ParentNode=Common
+Name=CC-CV
+</Action1>
+
+<Segment1>
+Type=-1
+Version=3
+Definition=Segment #, Point #, E(V), I(A), Elapsed Time(s), ADC Sync Input(V), Current Range, Status, E Applied(V), Frequency(Hz), E Real, E Imag, I Real, I Imag, Z Real, Z Imag, E2 Status, E2(V), E2 Real, E2 Imag, Z2 Real, Z2 Imag, ActionId, AC Amplitude, 0
+</Segment1>
+
+<DockingLayout>
+<?xml version="1.0" encoding="utf-16"?>
+<!--DockPanel configuration file. Author: Weifen Luo, all rights reserved.-->
+<!--!!! AUTOMATICALLY GENERATED FILE. DO NOT MODIFY !!!-->
+<DockPanel FormatVersion="1.0" DockLeftPortion="0.25" DockRightPortion="0.25" DockTopPortion="0.25" DockBottomPortion="0.25" ActiveDocumentPane="0" ActivePane="0">
+  <Contents Count="1">
+    <Content ID="0" PersistString="PowerSTAT.DataBrowser" AutoHidePortion="0.25" IsHidden="False" IsFloat="False" />
+  </Contents>
+  <Panes Count="1">
+    <Pane ID="0" DockState="Document" ActiveContent="0">
+      <Contents Count="1">
+        <Content ID="0" RefID="0" />
+      </Contents>
+    </Pane>
+  </Panes>
+  <DockWindows>
+    <DockWindow ID="0" DockState="Document" ZOrderIndex="0">
+      <NestedPanes Count="1">
+        <Pane ID="0" RefID="0" PrevPane="-1" Alignment="Right" Proportion="0.5" />
+      </NestedPanes>
+    </DockWindow>
+    <DockWindow ID="1" DockState="DockLeft" ZOrderIndex="2">
+      <NestedPanes Count="0" />
+    </DockWindow>
+    <DockWindow ID="2" DockState="DockRight" ZOrderIndex="1">
+      <NestedPanes Count="0" />
+    </DockWindow>
+    <DockWindow ID="3" DockState="DockTop" ZOrderIndex="3">
+      <NestedPanes Count="0" />
+    </DockWindow>
+    <DockWindow ID="4" DockState="DockBottom" ZOrderIndex="4">
+      <NestedPanes Count="0" />
+    </DockWindow>
+  </DockWindows>
+  <FloatWindows Count="0" />
+</DockPanel>
+</DockingLayout>

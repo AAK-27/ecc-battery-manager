@@ -1,3 +1,7 @@
+# ECC Battery Manager Stuff
+battery_telemetry.db
+Test/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
