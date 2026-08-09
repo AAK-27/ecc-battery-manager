@@ -40,12 +40,25 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
         # Proceed if this is the correct file
         if str(event.src_path).endswith(self.file_name + ".csv"):
             print(f"Experiment \"{self.file_name}\" (log: {self.log_id}) completed!")
+            self.stop_event.set() # Stop the file watchdog
 
-            data = pandas.read_csv(event.src_path) # Open the csv file.
+            data = None
+            while True:
+                try:
+                    data = pandas.read_csv(event.src_path) # Open the csv file.
+                    if data.empty: # If the file is empty, wait and try again
+                        time.sleep(1)
+                        continue
+                    else:
+                        break
+                except pandas.errors.EmptyDataError:
+                    time.sleep(1) # Give VersaStudio some time to write the csv file... reading it immediately sometimes results in an empty file
+                    continue
+
             # Get the current at every time interval
             current = data['Current (A)']
             elapsed_time = data['Elapsed Time (s)']
-            voltage = data['Voltage (V)']
+            voltage = data['Potential (V)']
             delta_capacity = np.trapezoid(current, elapsed_time) # Integrate the current over time to get the change in capacity
             delta_capacity_mAh = delta_capacity * 1000 / 3600 # Convert from A*s to mAh
             print(f"The change in capacity was {delta_capacity_mAh} mAh.")
@@ -57,7 +70,7 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
                 cursor = conn.cursor() # Create a cursor object to execute queries
 
                 # First read the existing battery data
-                cursor.execute("SELECT * FROM battery_logs where battery_id = ?", (self.battery_id))
+                cursor.execute("SELECT * FROM battery_logs where battery_id = ?", (self.battery_id,))
                 battery_history = cursor.fetchall()
 
                 battery_info = get_battery_info(self.battery_id)
@@ -92,7 +105,7 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
                         dod += ddod # DOD increases during discharge
                         soc = soh - dod
                         # Was battery fully discharged?
-                        if voltage[-1] <= battery_info["min_voltage"]:
+                        if voltage.iloc[-1] <= battery_info["min_voltage"]:
                             soh = dod
                             actual_total_capacity = soh * rated_capacity # Calculate the new capacity
                             soc = 0 # Reset SOC at full discharge                        
@@ -103,7 +116,7 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
                         dod = max(0.0, dod) # Prevent DOD from becoming negative due to drift
                         soc = soh - dod
                         # Was battery fully charged?
-                        if voltage[-1] >= battery_info["max_voltage"]:
+                        if voltage.iloc[-1] >= battery_info["max_voltage"]:
                             soh = soc
                             actual_total_capacity = soh * rated_capacity # Calculate the new capacity
                             dod = 0 # Reset DOD at full charge
@@ -125,7 +138,8 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
                     UPDATE battery_logs
                     SET duration = ?, soc = ?, soh = ?
                     WHERE log_id = ?
-                """, (elapsed_time[-1], soc, soh, self.log_id))
+                """, (elapsed_time.iloc[-1], soc, soh, self.log_id))
+                conn.commit()
 
             except sqlite3.Error as e:
                 print(f"A sqlite error occurred while processing experiment log id {self.log_id} on battery {self.battery_id}: {e}")
@@ -133,7 +147,6 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
             finally:
                 if conn is not None:
                     conn.close()
-            self.stop_event.set() # Stop the file watchdog
 
 class EnhancedCoulombCounting():
     def __init__(self):
