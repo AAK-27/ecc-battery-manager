@@ -178,16 +178,16 @@ class EnhancedCoulombCounting():
                 )
             """)
             conn.commit()
-            cursor.execute("""
-                INSERT OR IGNORE INTO batteries (battery_id, rated_capacity, max_voltage, min_voltage, max_charge_current, max_discharge_current, state_of_charge, remaining_capacity, state_of_health, actual_total_capacity, depth_of_discharge)
-                VALUES ('TEST', 1000, 4.2, 3.0, 2.0, 3.0, 100, 950, 99.98, 1000, 0)
-            """)
-            conn.commit()
-            cursor.execute("""
-                INSERT OR IGNORE INTO battery_logs (battery_id, timestamp, action, duration, soc, soh)
-                VALUES ('TEST', '2023-06-15 10:00:00', 'Charge', 3600, 80.0, 95.0)
-            """)
-            conn.commit()
+            # cursor.execute("""
+            #     INSERT OR IGNORE INTO batteries (battery_id, rated_capacity, max_voltage, min_voltage, max_charge_current, max_discharge_current, state_of_charge, remaining_capacity, state_of_health, actual_total_capacity, depth_of_discharge)
+            #     VALUES ('TEST', 1000, 4.2, 3.0, 2.0, 3.0, 100, 950, 99.98, 1000, 0)
+            # """)
+            # conn.commit()
+            # cursor.execute("""
+            #     INSERT OR IGNORE INTO battery_logs (battery_id, timestamp, action, duration, soc, soh)
+            #     VALUES ('TEST', '2023-06-15 10:00:00', 'Charge', 3600, 80.0, 95.0)
+            # """)
+            # conn.commit()
 
         except sqlite3.Error as e:
             print(f"An error occurred: {e}")

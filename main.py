@@ -242,12 +242,12 @@ def show_creation_form(main_content_frame, sidebar_frame, add_button):
         success_label = tk.Label(main_content_frame, text="Battery registered successfully!", fg="green", font=("Arial", 12))
         success_label.pack(pady=10)
 
-        # Update the sidebar with the new battery
-        new_btn = tk.Button(sidebar_frame, text=f"Battery {battery_id}")
+        # Add the new battery to the sidebar
+        new_btn = tk.Button(sidebar_frame, text=f"Battery {battery_id}", command=lambda id=battery_id: show_battery_details(main_content_frame, id))
         new_btn.pack(fill="x", padx=5, ipady=10, pady=5)
         # Destroy the "Add Battery" button and recreate it
         add_button.destroy()
-        new_add_button = tk.Button(sidebar_frame, text="Add Battery", command=lambda: show_creation_form(main_content_frame, sidebar_frame, add_button))
+        new_add_button = tk.Button(sidebar_frame, text="Add Battery", command=lambda: show_creation_form(main_content_frame, sidebar_frame, new_add_button))
         new_add_button.pack(fill="x", padx=5, ipady=10, pady=5)
 
         print("Successfully added battery!")
