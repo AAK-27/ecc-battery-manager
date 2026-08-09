@@ -276,6 +276,30 @@ class EnhancedCoulombCounting():
             if conn is not None:
                 conn.close()
 
+    def delete_log(self, log_id: int) -> bool:
+        """
+        Deletes a log entry from the database.
+        Returns True if successful, False otherwise.
+        """
+        conn = None
+        try:
+            conn = sqlite3.connect("battery_telemetry.db") # Create a connection to the database
+            cursor = conn.cursor() # Create a cursor object to execute queries
+            cursor.execute("""
+                        DELETE FROM battery_logs
+                        WHERE log_id = ?
+            """, (log_id,))
+            conn.commit()
+            return True
+
+        except sqlite3.Error as e:
+            print(f"An error occurred while deleting log entry ({log_id}): {e}")
+            return False
+
+        finally:
+            if conn is not None:
+                conn.close()
+
     def run_action(self, battery_id: str, action: str, parameters: dict, instrument_index:int|None = None) -> bool:
         """
         Runs the specified action on the specified battery.
@@ -409,10 +433,25 @@ class EnhancedCoulombCounting():
 
                     self.running_threads.append(thread) # Keep track of the thread so it doesn't get garbage collected
                     return True
-                
-                return False # If vsm fails to run the experiment
-            return False # If vsm fails to open the experiment file
-        return False # If vsm fails to generate the experiment file
+
+                # Else vsm failed to run the experiment
+            # Else vsm failed to open the experiment file
+
+            # At this point the experiment file was generated, but the experiment failed to run, so we should delete the unused experiment file to save space
+            try:
+                os.remove(file_path) # Delete the experiment file
+                print(f"Removed experiment file from an experiment which failed to start: {file_path}")
+            except Exception as e:
+                print(f"Failed to remove experiment file from an experiment which failed to start: {e}")
+
+        # Else vsm failed to generate the experiment file
+
+        # If it failed to run the experiment for any reason, we should remove the incomplete log entry, as it may cause problems later
+        if self.delete_log(log_id): # Delete the incomplete log entry
+            print(f"Removed log entry ({log_id}) for an experiment which failed to start.")
+        else:
+            print(f"Failed to remove log entry ({log_id}) for an experiment which failed to start!")
+        return False
 
     # def start_charge(self, battery_id: str, parameters: dict) -> bool:
     #     log_id = self.write_log(battery_id, "Charge")

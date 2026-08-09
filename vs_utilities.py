@@ -79,10 +79,10 @@ class VersaStudioManager():
     def open_experiment(self, file_path:str, keep_open:bool = False, instrument_index:int|None = None) -> bool:
         """
         Opens an experiment file in VersaStudio.
-        Returns True if the file opened successfully and False otherwise. 
+        Returns True if the file opened successfully and False otherwise.
+        keep_open will only keep the VersaStudio window open if the file opens successfully 
         """
-        self.window.maximize()
-
+        
         # If an instrument was specified check if it is actually available
         if instrument_index:
             if not self.instruments[instrument_index]['available']:
@@ -96,9 +96,12 @@ class VersaStudioManager():
             else: # If no instruments are available then don't do anything
                 print("WARNING! No instruments available!\nFailed to open experiment.")
                 return False
-    
-        self.select_instrument(instrument_index, True) # Select the instrument to use for the experiment
-        
+
+        # (self.select_instrument(...) will maximize the window and keep it open)
+        if not self.select_instrument(instrument_index, True): # Select the instrument to use for the experiment
+            self.window.minimize()
+            return False # If it fails to select the instrument
+
         try:
             self.window.menu_select("Experiment->Open")
             open_dialog = self.app.window(title="Open Experiment")
@@ -122,6 +125,7 @@ class VersaStudioManager():
 
         except Exception as e:
             print(f"Error occured while opening experiment: {e}")
+            self.window.minimize()
             return False
 
         finally: # When the file loads the window changes, so we need a new reference
