@@ -69,9 +69,16 @@ def show_battery_details(main_content_frame, battery_id):
         timestamp = datetime.fromisoformat(entry[2]).strftime("%Y-%m-%d %H:%M:%S")
         tk.Label(history, text=f"Time: {timestamp}", font=("Arial", 12), background="lightgrey").pack()
         tk.Label(history, text=f"Action: {entry[3]}", font=("Arial", 12), background="lightgrey").pack()
-        tk.Label(history, text=f"Duration: {entry[4]}s", font=("Arial", 12), background="lightgrey").pack()
-        tk.Label(history, text=f"State of Charge: {entry[5]}%", font=("Arial", 12), background="lightgrey").pack()
-        tk.Label(history, text=f"State of Health: {entry[6]}%", font=("Arial", 12), background="lightgrey").pack()
+        duration = "In progress" if not entry[4] else str(entry[4]) + "s"
+        tk.Label(history, text=f"Duration: {duration}", font=("Arial", 12), background="lightgrey").pack()
+        if entry[5]:
+            tk.Label(history, text=f"State of Charge: {entry[5]:.2}%", font=("Arial", 12), background="lightgrey").pack()
+        else:
+            tk.Label(history, text=f"State of Charge: --", font=("Arial", 12), background="lightgrey").pack()
+        if entry[6]:
+            tk.Label(history, text=f"State of Health: {entry[6]:.2}%", font=("Arial", 12), background="lightgrey").pack()
+        else:
+            tk.Label(history, text=f"State of Health: --", font=("Arial", 12), background="lightgrey").pack()
         tk.Label(history, text="------------------------", font=("Arial", 12), background="lightgrey").pack()
 
     def update_action_parameters(action, parameters, parameters_frame):
@@ -132,9 +139,9 @@ def show_battery_details(main_content_frame, battery_id):
     soh = battery_info["soh"]
     atc = battery_info["actual_total_capacity"]
     
-    tk.Label(details_frame, text=f"Current SOC: {soc}%", font=("Arial", 12)).pack(pady=5)
-    tk.Label(details_frame, text=f"Current SOH: {soh}%", font=("Arial", 12)).pack(pady=5)
-    tk.Label(details_frame, text=f"Actual Total Capacity: {atc}", font=("Arial", 12)).pack(pady=5)
+    tk.Label(details_frame, text=f"Current SOC: {soc:.2}%", font=("Arial", 12)).pack(pady=5)
+    tk.Label(details_frame, text=f"Current SOH: {soh:.2}%", font=("Arial", 12)).pack(pady=5)
+    tk.Label(details_frame, text=f"Actual Total Capacity: {int(atc)}", font=("Arial", 12)).pack(pady=5)
     tk.Label(details_frame, text=f"Charge Cycles: {"--"}", font=("Arial", 12)).pack(pady=5)
 
     tk.Label(battery_frame, text="Run Actions", font=("Arial", 18)).pack(side="top", pady=(40, 30))

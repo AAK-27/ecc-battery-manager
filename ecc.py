@@ -82,7 +82,7 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
 
                 # ============ ECC Algorithm ============
                 dod = battery_info["dod"] # Initialize DOD to the previous value
-                ddod = abs(delta_capacity_mAh / rated_capacity) # Calculate the change in DOD
+                ddod = abs(delta_capacity_mAh / rated_capacity) * 100 # Calculate the change in DOD
 
                 if len(battery_history) == 1:
                     # This is a special case where the battery is being initialized for the first time
@@ -93,10 +93,10 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
                     else:
                         # this means the battery started at either full charge or zero charge
                         # and was either fully charged or fully discharged
-                        soh = abs(delta_capacity_mAh) / rated_capacity
+                        soh = abs(delta_capacity_mAh) / rated_capacity * 100
                         soc = 0 if current[0] < 0 else soh
                         dod = soh if current[0] < 0 else 0
-                        actual_total_capacity = soh * rated_capacity
+                        actual_total_capacity = soh / 100 * rated_capacity
 
                 else:
                     # Proceed with normal ECC logic for battery with accurate history
@@ -107,7 +107,7 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
                         # Was battery fully discharged?
                         if voltage.iloc[-1] <= battery_info["min_voltage"]:
                             soh = dod
-                            actual_total_capacity = soh * rated_capacity # Calculate the new capacity
+                            actual_total_capacity = soh / 100 * rated_capacity # Calculate the new capacity
                             soc = 0 # Reset SOC at full discharge                        
                     
                     # Charging Mode (I > 0):
@@ -118,10 +118,10 @@ class ExperimentDataFileHandler(FileSystemEventHandler):
                         # Was battery fully charged?
                         if voltage.iloc[-1] >= battery_info["max_voltage"]:
                             soh = soc
-                            actual_total_capacity = soh * rated_capacity # Calculate the new capacity
+                            actual_total_capacity = soh / 100 * rated_capacity # Calculate the new capacity
                             dod = 0 # Reset DOD at full charge
                             
-                remaining_capacity = soc * rated_capacity
+                remaining_capacity = soc / 100 * rated_capacity
 
                 cursor.execute("""
                     UPDATE batteries
@@ -265,7 +265,7 @@ class EnhancedCoulombCounting():
             if conn is not None:
                 conn.close()
 
-    def write_log(self, battery_id, action, duration="NULL", soc="NULL", soh="NULL") -> int|None:
+    def write_log(self, battery_id, action, duration=None, soc=None, soh=None) -> int|None:
         """
         Writes a battery log entry to the database.
         Returns the log id of the new entry or None if it fails.
@@ -362,7 +362,7 @@ class EnhancedCoulombCounting():
                     if target_soc <= current_soc: # Ensure the target SOC is higher than the current value when charging
                         print(f"Failed to start charge! --The target SOC ({target_soc}%) must be greater than the current SOC ({current_soc}%)")
                         return False
-                    delta_q = (target_soc - current_soc) * battery_info["rated_capacity"] # Calculate the difference in charge in mAh
+                    delta_q = (target_soc - current_soc) / 100 * battery_info["rated_capacity"] # Calculate the difference in charge in mAh
                     charge_time = delta_q * (3600) / 1000 / parameters["current"] # Calculate the required charge time in seconds
                     parameters["duration"] = charge_time # Set the duration parameter
 
@@ -401,7 +401,7 @@ class EnhancedCoulombCounting():
                     if target_soc >= current_soc: # Ensure the target SOC is higher than the current value when charging
                         print(f"Failed to start disharge! --The target SOC ({target_soc}%) must be less than the current SOC ({current_soc}%)")
                         return False
-                    delta_q = (current_soc - target_soc) * battery_info["rated_capacity"] # Calculate the difference in charge in mAh
+                    delta_q = (current_soc - target_soc) / 100 * battery_info["rated_capacity"] # Calculate the difference in charge in mAh
                     discharge_time = delta_q * (3600) / 1000 / -parameters["current"] # Calculate the required charge time in seconds
                     parameters["duration"] = discharge_time # Set the duration parameter
 
