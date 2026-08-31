@@ -83,12 +83,12 @@ class VersaStudioManager():
         keep_open will only keep the VersaStudio window open if the file opens successfully 
         """
         
-        # If an instrument was specified check if it is actually available
-        if instrument_index:
+        # If an instrument was specified check if it is actually valid and available
+        if instrument_index in self.instruments:
             if not self.instruments[instrument_index]['available']:
                 print(f"WARNING! Instrument {instrument_index} is not available!\nFailed to open experiment.")
                 return False
-        else: # If an instrument wasn't specified try to use the next available instrument
+        else: # If an instrument wasn't valid or specified try to use the next available instrument
             for key, value in self.instruments.items():
                 if value['available']:
                     instrument_index = key
@@ -97,6 +97,9 @@ class VersaStudioManager():
                 print("WARNING! No instruments available!\nFailed to open experiment.")
                 return False
 
+        # Get new window references
+        self.window = self.app.window(title_re=".*VersaStudio.*")
+        self.window_uia = self.app_uia.window(title_re=".*VersaStudio.*")
         # (self.select_instrument(...) will maximize the window and keep it open)
         if not self.select_instrument(instrument_index, True): # Select the instrument to use for the experiment
             self.window.minimize()
@@ -157,6 +160,12 @@ class VersaStudioManager():
             instrument_ui_label = self.window_uia.child_window(title=instrument_label, auto_id="lbName")
             instrument_ui_label.double_click_input() # you have to double click the label to select it
             return True
+        except TimeoutError as e:
+            print(f"TimeoutError opening instrument selection panel: {e}")
+            return False
+        except ElementAmbiguousError as e:
+            print(f"ElementAmbiguousError selecting instrument: {e}")
+            return False
         except Exception as e:
             print(f"Error selecting instrument: {e}")
             return False
