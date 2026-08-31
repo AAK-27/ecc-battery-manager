@@ -155,10 +155,9 @@ class VersaStudioManager():
         try:
             # Navigate through the menu to open the instrument selection pane
             self.window.menu_select("Tools->Select Instrument")
-            self.window_uia.wait("ready", timeout=3)
-            # Use the UIA backend to search for the instrument label
-            instrument_ui_label = self.window_uia.child_window(title=instrument_label, auto_id="lbName")
-            instrument_ui_label.double_click_input() # you have to double click the label to select it
+            # Find the label for the corresponding instrument
+            instrument_label = self.window.child_window(title=self.instruments[instrument]['label'], auto_id="lbName")
+            instrument_label.parent().double_click_input() # Double click on the panel containing the label to select the instrument
             return True
         except TimeoutError as e:
             print(f"TimeoutError opening instrument selection panel: {e}")
