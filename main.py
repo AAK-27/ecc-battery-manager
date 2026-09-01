@@ -94,7 +94,7 @@ def show_battery_details(main_content_frame, battery_id):
                 target_soc_entry.focus_set()
                 target_soc_entry.select_range(0, tk.END)
                 tk.Label(parameters_frame, text="Current (A):", font=("Arial", 12)).grid(row=1, column=0)
-                parameters["current"].set(min(battery_info["max_charge_current"], INSTRUMENT_MAX_CURRENT)) # Enter a default value for current and limit it to the instrument's max
+                parameters["current"].set( min(min(battery_info["rated_capacity"]*0.0002, battery_info["max_charge_current"]), INSTRUMENT_MAX_CURRENT)) # Enter a default value for current and limit it to the instrument's max
                 tk.Entry(parameters_frame, font=("Arial", 12), textvariable=parameters["current"], ).grid(row=1, column=1)
                 # tk.Label(parameters_frame, text="CV Voltage (V):", font=("Arial", 12)).grid(row=2, column=0)
                 # tk.Entry(parameters_frame, font=("Arial", 12), textvariable=parameters["charge_voltage"]).grid(row=2, column=1)
@@ -105,7 +105,8 @@ def show_battery_details(main_content_frame, battery_id):
                 target_soc_entry.focus_set()
                 target_soc_entry.select_range(0, tk.END)
                 tk.Label(parameters_frame, text="Current (A):", font=("Arial", 12)).grid(row=1, column=0)
-                parameters["current"].set(min(battery_info["max_discharge_current"], INSTRUMENT_MAX_CURRENT)) # Enter a default value for current and limit it to the instrument's min
+                # Set .2C as the default value for current and limit it to the instrument's max
+                parameters["current"].set(min(min(battery_info["rated_capacity"]*0.0002, battery_info["max_discharge_current"]), INSTRUMENT_MAX_CURRENT))
                 tk.Entry(parameters_frame, font=("Arial", 12), textvariable=parameters["current"]).grid(row=1, column=1)
             case "cycle":
                 tk.Label(parameters_frame, text="Current (A):", font=("Arial", 12)).grid(row=0, column=0)
@@ -220,12 +221,12 @@ def show_creation_form(main_content_frame, sidebar_frame, add_button):
     min_voltage_entry = tk.Entry(form_frame, textvariable=min_voltage_var, font=("Arial", 12))
     min_voltage_entry.grid(row=4, column=1, pady=10, padx=10)
     # Max Charge Current (A)
-    tk.Label(form_frame, text="Max Charge Current (A):", font=("Arial", 12)).grid(row=5, column=0, sticky="w", pady=10, padx=10)
+    tk.Label(form_frame, text="Max Charge Current (A) (Enter a positive value):", font=("Arial", 12)).grid(row=5, column=0, sticky="w", pady=10, padx=10)
     max_charge_current_var = tk.DoubleVar() # Create a double variable to hold the input value
     max_charge_current_entry = tk.Entry(form_frame, textvariable=max_charge_current_var, font=("Arial", 12))
     max_charge_current_entry.grid(row=5, column=1, pady=10, padx=10)
     # Max Discharge Current (A)
-    tk.Label(form_frame, text="Max Discharge Current (A):", font=("Arial", 12)).grid(row=6, column=0, sticky="w", pady=10, padx=10)
+    tk.Label(form_frame, text="Max Discharge Current (A) (Enter a positive value):", font=("Arial", 12)).grid(row=6, column=0, sticky="w", pady=10, padx=10)
     max_discharge_current_var = tk.DoubleVar() # Create a double variable to hold the input value
     max_discharge_current_entry = tk.Entry(form_frame, textvariable=max_discharge_current_var, font=("Arial", 12))
     max_discharge_current_entry.grid(row=6, column=1, pady=10, padx=10)
@@ -236,8 +237,9 @@ def show_creation_form(main_content_frame, sidebar_frame, add_button):
         rated_capacity = rated_capacity_var.get()
         max_voltage = max_voltage_var.get()
         min_voltage = min_voltage_var.get()
-        max_charge_current = max_charge_current_var.get()
-        max_discharge_current = max_discharge_current_var.get()
+        # Take absolute values of current in case user enters negative value for discharge current
+        max_charge_current = abs(max_charge_current_var.get())
+        max_discharge_current = abs(max_discharge_current_var.get())
         # Add the battery to the database
         ecc.add_battery(battery_id, rated_capacity, max_voltage, min_voltage, max_charge_current, max_discharge_current)
                     
@@ -277,6 +279,8 @@ def show_initialization_screen(main_content_frame, battery_id):
     instrument_entry = ttk.Combobox(init_frame, font=("Arial", 12), values=instrument_names, state="readonly")
     instrument_entry.grid(row=2, column=1, pady=10, padx=10)
 
+    battery_info = get_battery_info(battery_id)
+
     def run_initialization():
         current_charge = current_charge_entry.get()
         action = "charge"
@@ -285,11 +289,11 @@ def show_initialization_screen(main_content_frame, battery_id):
             case "full":
                 action = "discharge"
                 parameters["target_soc"] = 0
-                parameters["current"] = -1
+                parameters["current"] = min(min(battery_info["rated_capacity"]*0.0002, battery_info["max_discharge_current"]), INSTRUMENT_MAX_CURRENT)
             case "discharged":
                 action = "charge"
-                parameters["target_soc"] =100
-                parameters["current"] = 1
+                parameters["target_soc"] = 100
+                parameters["current"] = min(min(battery_info["rated_capacity"]*0.0002, battery_info["max_charge_current"]), INSTRUMENT_MAX_CURRENT)
             case "indeterminate":
                 print("Not yet implemented, just manually fully charge or discharge the battery before initializing!")
                 # action = "cycle"

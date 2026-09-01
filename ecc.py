@@ -12,7 +12,6 @@ from watchdog.events import FileSystemEventHandler
 DB_NAME = "battery_telemetry.db"
 
 INSTRUMENT_MAX_CURRENT = 1
-INSTRUMENT_MIN_CURRENT = -1
 INSTRUMENT_CHANNELS = ("Channel 1", "Channel 2")
 
 CV_CURRENT_LIMIT = 0.5 # Determines the minimum current limit for the CV step during charge actions
@@ -332,8 +331,8 @@ class EnhancedCoulombCounting():
                 # -- If the desired charge is 100% then the time should be larger than the total charge time for 0->100%
 
                 # First, verify the current is valid:
-                if parameters["current"] < 0.0:
-                    print(f"Failed to start charge! --Charge current ({parameters["current"]}A) must be greater than 0.")
+                if parameters["current"] <= 0.0:
+                    print(f"Failed to start charge: Charge current must be greater than 0A!")
                     return False
 
                 # For parameters dependent on the battery's info, we need to get this data from the database
@@ -374,8 +373,8 @@ class EnhancedCoulombCounting():
                 # -- If the desired charge is 0% then the time should be larger than the total discharge time for 100->0%
                 
                 # First verify if the current is valid:
-                if parameters["current"] > 0.0:
-                    print(f"Failed to start discharge! --Discharge current must be less than zero not: {parameters["current"]}")
+                if parameters["current"] <= 0.0:
+                    print(f"Failed to start discharge: Discharge current must be greater than 0A!")
                     return False
 
                 # For parameters dependent on the battery's info, we need to get this data from the database
@@ -385,8 +384,8 @@ class EnhancedCoulombCounting():
                     return False
 
                 # Verify that the set current is within the battery's specs
-                if -parameters["current"] > battery_info["max_discharge_current"]:
-                    print(f"Failed to start discharge! --Discharge current ({parameters["current"]}A) exceeds this battery's maximum discharge current ({-battery_info["max_discharge_current"]}A)")
+                if parameters["current"] > battery_info["max_discharge_current"]:
+                    print(f"Failed to start discharge! --Discharge current ({parameters["current"]}A) exceeds this battery's maximum discharge current ({battery_info["max_discharge_current"]}A)")
                     return False
 
                 # Set the voltage parameter to the battery's minimum voltage
@@ -402,7 +401,7 @@ class EnhancedCoulombCounting():
                         print(f"Failed to start disharge! --The target SOC ({target_soc}%) must be less than the current SOC ({current_soc}%)")
                         return False
                     delta_q = (current_soc - target_soc) / 100 * battery_info["rated_capacity"] # Calculate the difference in charge in mAh
-                    discharge_time = delta_q * (3600) / 1000 / -parameters["current"] # Calculate the required charge time in seconds
+                    discharge_time = delta_q * (3600) / 1000 / parameters["current"] # Calculate the required charge time in seconds
                     parameters["duration"] = discharge_time # Set the duration parameter
 
             case "cycle":
